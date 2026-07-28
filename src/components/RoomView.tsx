@@ -45,19 +45,10 @@ export const RoomView: React.FC<RoomViewProps> = ({
   const [showPresenceList, setShowPresenceList] = useState(false);
   const [isLogMinimized, setIsLogMinimized] = useState(true);
 
-  // Real-time peers list
-  const [peersList, setPeersList] = useState<Peer[]>(room.activePeers || [
-    { id: 'OP_01', name: 'OP_01 (You)', isYou: true, status: 'ONLINE', latencyMs: 0, ip: '127.0.0.1' },
-    { id: 'OP_02', name: 'OP_02 (Peer)', isYou: false, status: 'ONLINE', latencyMs: 24, ip: '192.168.1.42' },
-  ]);
+  // Real-time peers list - only from actual signaling server
+  const [peersList, setPeersList] = useState<Peer[]>(room.activePeers || []);
   
-  const [logs, setLogs] = useState<SystemLogEntry[]>(room.bundleItems ? [
-    createLogEntry('PEER_CONNECTED', '127.0.0.1', 'info'),
-    createLogEntry('WEBRTC_STABLE', 'TRUE', 'success'),
-    createLogEntry('ENCRYPTION', 'AES-256-GCM', 'encryption'),
-    createLogEntry('LATENCY', '24MS', 'info'),
-    createLogEntry('BITRATE', '12.4 MB/S', 'success'),
-  ] : []);
+  const [logs, setLogs] = useState<SystemLogEntry[]>([]);
 
   // Transfer state
   const [transfer, setTransfer] = useState<TransferProgress | null>(null);
@@ -89,7 +80,9 @@ export const RoomView: React.FC<RoomViewProps> = ({
 
   // Initialize WebRTC engine lifecycle & handle ICE candidates
   useEffect(() => {
-    const peerEngine = new WebRTCPeerEngine(room.id, 'OP_01');
+    // Use the actual current peer ID from the room state (first peer is always the local peer)
+    const localPeerId = room.activePeers.find((p) => p.isYou)?.id || 'LOCAL_PEER';
+    const peerEngine = new WebRTCPeerEngine(room.id, localPeerId);
 
     peerEngine.onStateChange = (state) => {
       setWebrtcState(state);
@@ -115,40 +108,10 @@ export const RoomView: React.FC<RoomViewProps> = ({
     };
   }, [room.id]);
 
-  const handleSimulateAddPeer = () => {
-    const nextNum = peersList.length + 1;
-    const newPeer: Peer = {
-      id: `OP_0${nextNum}`,
-      name: `OP_0${nextNum} (Mobile Node)`,
-      isYou: false,
-      status: 'ONLINE',
-      latencyMs: Math.floor(Math.random() * 20) + 14,
-      ip: `192.168.1.${100 + nextNum}`,
-    };
-    setPeersList((prev) => [...prev, newPeer]);
-    setLogs((prev) => [
-      ...prev.slice(-6),
-      createLogEntry('PEER_JOINED', newPeer.name, 'success'),
-    ]);
-  };
 
-  // Dynamically update Data Channel Ping (latencyMs) in real time
-  useEffect(() => {
-    const pingInterval = setInterval(() => {
-      setPeersList((prev) =>
-        prev.map((peer) =>
-          peer.isYou
-            ? peer
-            : {
-                ...peer,
-                latencyMs: Math.max(10, Math.min(50, peer.latencyMs + Math.floor(Math.random() * 5) - 2)),
-              }
-        )
-      );
-    }, 3000);
 
-    return () => clearInterval(pingInterval);
-  }, []);
+  // Real ping updates will come from WebRTC data channel heartbeat
+  // TODO: Subscribe to WebRTC engine's latency updates instead of simulated values
 
   const handleCopyOTP = () => {
     navigator.clipboard.writeText(room.id).then(() => {
@@ -233,74 +196,57 @@ export const RoomView: React.FC<RoomViewProps> = ({
 
     const encResult = await encryptFileBuffer(fileArrayBuffer!);
 
-    await new Promise<void>((resolve) => {
-      let chunk = 0;
-      const totalChunks = Math.max(3, Math.min(20, Math.ceil(fileSize / (256 * 1024))));
+    // TODO: Real WebRTC Data Channel Transfer
+    // This now needs to:
+    // 1. Get the WebRTC data channel from the peer engine
+    // 2. Implement real chunking (64-256KB adaptive)
+    // 3. Send chunks over RTCDataChannel with CRC32 verification per chunk
+    // 4. Calculate real RTT and throughput from actual network metrics
+    // 5. Support resume capability with transferId tracking
+    // 6. Ensure strict room/transfer isolation via roomId + transferId
+    
+    // For now, create a local bundle item (file stays in memory, ready for peer download)
+    const blob = new Blob([fileArrayBuffer!], { type: fileType });
+    const blobUrl = URL.createObjectURL(blob);
 
-      const timer = setInterval(() => {
-        chunk++;
-        const percent = Math.min(100, Math.round((chunk / totalChunks) * 100));
-        const bytesDone = Math.round((percent / 100) * fileSize);
-        const currentSpeed = parseFloat((12 + Math.random() * 6).toFixed(1));
+    const fileLabel = 'label' in file ? file.label : getFileTypeLabel(fileType, fileName);
+    const localPeerId = room.activePeers.find((p) => p.isYou)?.id || 'LOCAL_PEER';
 
-        setTransfer((prev) =>
-          prev
-            ? {
-                ...prev,
-                transferredBytes: bytesDone,
-                progressPercent: percent,
-                currentSpeedMBps: currentSpeed,
-                encryptedChunksCount: chunk,
-                etaSeconds: Math.max(0, Math.ceil((fileSize - bytesDone) / (currentSpeed * 1024 * 1024))),
-              }
-            : null
-        );
+    const newItem: BundleItem = {
+      id: `item-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      name: fileName,
+      size: fileSize,
+      type: fileType,
+      fileTypeLabel: fileLabel,
+      fileId: `FLX-${Math.floor(100 + Math.random() * 899)}-NODE-${fileName.substring(0, 3).toUpperCase()}`,
+      dimensions: textContentStr
+        ? `${textContentStr.split('\n').length} LINES // ${textContentStr.split(/\s+/).length} WORDS`
+        : fileType.startsWith('image/')
+        ? '1920 × 1080 PX'
+        : 'BINARY_STREAM',
+      sha256: encResult.sha256Hex,
+      encryptedHash: `AES256GCM_${encResult.sha256Hex.substring(0, 8)}`,
+      blobUrl: blobUrl,
+      rawBlob: blob,
+      textContent: textContentStr,
+      uploaderId: localPeerId,
+      uploaderName: localPeerId,
+      timestamp: Date.now(),
+      carbonFootprintGrams: carbon.p2pCarbonGrams,
+      peerSeeds: room.activePeers.length,
+      encryptionStatus: 'AES-256-GCM VERIFIED',
+    };
 
-        if (chunk >= totalChunks) {
-          clearInterval(timer);
+    onAddBundleItem(newItem);
 
-          const blob = new Blob([fileArrayBuffer!], { type: fileType });
-          const blobUrl = URL.createObjectURL(blob);
+    setLogs((prev) => [
+      ...prev.slice(-6),
+      createLogEntry('FILE_ADDED_TO_BUNDLE', fileName, 'success'),
+      createLogEntry('CARBON_SAVED', `${carbon.savedGrams}g CO2e`, 'info'),
+      createLogEntry('ENCRYPTION', 'AES-256-GCM', 'encryption'),
+    ]);
 
-          const fileLabel = 'label' in file ? file.label : getFileTypeLabel(fileType, fileName);
-
-          const newItem: BundleItem = {
-            id: `item-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-            name: fileName,
-            size: fileSize,
-            type: fileType,
-            fileTypeLabel: fileLabel,
-            fileId: `FLX-${Math.floor(100 + Math.random() * 899)}-NODE-${fileName.substring(0, 3).toUpperCase()}`,
-            dimensions: textContentStr
-              ? `${textContentStr.split('\n').length} LINES // ${textContentStr.split(/\s+/).length} WORDS`
-              : fileType.startsWith('image/')
-              ? '1920 × 1080 PX'
-              : 'BINARY_STREAM',
-            sha256: encResult.sha256Hex,
-            encryptedHash: `AES256GCM_${encResult.sha256Hex.substring(0, 8)}`,
-            blobUrl: blobUrl,
-            rawBlob: blob,
-            textContent: textContentStr,
-            uploaderId: 'OP_01',
-            uploaderName: 'OP_01',
-            timestamp: Date.now(),
-            carbonFootprintGrams: carbon.p2pCarbonGrams,
-            peerSeeds: room.activePeers.length,
-            encryptionStatus: 'AES-256-GCM VERIFIED',
-          };
-
-          onAddBundleItem(newItem);
-
-          setLogs((prev) => [
-            ...prev,
-            createLogEntry('AES256_TRANSFER_DONE', fileName, 'success'),
-            createLogEntry('CARBON_SAVED', `${carbon.savedGrams}g CO2e`, 'info'),
-          ]);
-
-          resolve();
-        }
-      }, 70);
-    });
+    setTransfer(null);
   };
 
   const handleFilesSelect = async (files: FileList | File[] | null) => {
@@ -310,8 +256,6 @@ export const RoomView: React.FC<RoomViewProps> = ({
     for (let i = 0; i < fileList.length; i++) {
       await processSingleFile(fileList[i], { current: i + 1, total: fileList.length });
     }
-
-    setTimeout(() => setTransfer(null), 800);
   };
 
   const handleShareTextSnippet = async (e: React.FormEvent) => {
@@ -455,13 +399,6 @@ export const RoomView: React.FC<RoomViewProps> = ({
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#7342E2] rounded-full shadow-[0_0_8px_#7342E2] animate-pulse"></div>
               </div>
             ))}
-            <button
-              onClick={handleSimulateAddPeer}
-              className="w-11 h-11 md:w-12 md:h-12 border border-dashed border-[#192837]/30 rounded-xl flex items-center justify-center text-[#192837]/50 hover:border-[#7342E2] hover:text-[#7342E2] transition-all cursor-pointer bg-white/50"
-              title="Simulate Peer Connection"
-            >
-              <span className="material-symbols-outlined text-lg">add</span>
-            </button>
           </div>
 
           <div className="flex flex-col">
@@ -508,13 +445,6 @@ export const RoomView: React.FC<RoomViewProps> = ({
               </h3>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={handleSimulateAddPeer}
-                className="px-3 py-1 bg-white border border-[#192837]/15 hover:border-[#7342E2] text-[#192837] font-mono text-[11px] rounded-lg transition-all cursor-pointer flex items-center gap-1 font-bold shadow-sm"
-              >
-                <span className="material-symbols-outlined text-sm">person_add</span>
-                SIMULATE_PEER_JOIN
-              </button>
               <button
                 onClick={() => setIsQrModalOpen(true)}
                 className="px-3 py-1 bg-[#7342E2]/15 border border-[#7342E2]/40 text-[#7342E2] font-mono text-[11px] rounded-lg transition-all cursor-pointer flex items-center gap-1 font-bold shadow-sm"
