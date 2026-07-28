@@ -1,0 +1,6 @@
+{
+  "name": "FLUX P2P",
+  "description": "Minimalist ephemeral P2P file sharing platform with AES-256-GCM encryption, WebRTC data channels, carbon footprint tracking, and brutalist-glass UI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
