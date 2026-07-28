@@ -40,6 +40,7 @@ export const RoomView: React.FC<RoomViewProps> = ({
   const [errorToasts, setErrorToasts] = useState<ErrorToast[]>([]);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [showPresenceList, setShowPresenceList] = useState(false);
+  const [isLogMinimized, setIsLogMinimized] = useState(true);
 
   // Real-time peers list
   const [peersList, setPeersList] = useState<Peer[]>(room.activePeers || [
@@ -95,16 +96,8 @@ export const RoomView: React.FC<RoomViewProps> = ({
       ]);
     };
 
-    // Implement the onicecandidate signal output handler to broadcast candidates
-    peerEngine.onSignalOutput = (signal) => {
-      if (signal.type === 'candidate') {
-        const candidateType = signal.data.candidate ? signal.data.candidate.split(' ')[7] || 'host' : 'end';
-        setLogs((prev) => [
-          ...prev.slice(-6),
-          createLogEntry('ICE_CANDIDATE_BROADCAST', `${candidateType.toUpperCase()} // READY`, 'info'),
-        ]);
-      }
-    };
+    // Removed redundant ice candidate log spam
+    peerEngine.onSignalOutput = (_signal) => {};
 
     peerEngine.onError = (errorMsg, code) => {
       addErrorToast(code, errorMsg);
@@ -126,41 +119,39 @@ export const RoomView: React.FC<RoomViewProps> = ({
       name: `OP_0${nextNum} (Mobile Node)`,
       isYou: false,
       status: 'ONLINE',
-      latencyMs: Math.floor(Math.random() * 30) + 15,
+      latencyMs: Math.floor(Math.random() * 20) + 14,
       ip: `192.168.1.${100 + nextNum}`,
     };
     setPeersList((prev) => [...prev, newPeer]);
     setLogs((prev) => [
       ...prev.slice(-6),
       createLogEntry('PEER_JOINED', newPeer.name, 'success'),
-      createLogEntry('STUN_HANDSHAKE', `${newPeer.ip}:19302`, 'info'),
     ]);
   };
 
-  // Auto-simulate WebRTC logs periodically
+  // Dynamically update Data Channel Ping (latencyMs) in real time
   useEffect(() => {
-    const logEvents = [
-      { label: 'PEER_HANDSHAKE', value: 'ACK_OK', type: 'success' },
-      { label: 'ICE_CANDIDATE', value: 'HOST_READY', type: 'info' },
-      { label: 'DATACHANNEL_PING', value: '18MS', type: 'info' },
-      { label: 'ENCRYPTION_KEY', value: 'ROTATED', type: 'encryption' },
-    ];
+    const pingInterval = setInterval(() => {
+      setPeersList((prev) =>
+        prev.map((peer) =>
+          peer.isYou
+            ? peer
+            : {
+                ...peer,
+                latencyMs: Math.max(10, Math.min(50, peer.latencyMs + Math.floor(Math.random() * 5) - 2)),
+              }
+        )
+      );
+    }, 3000);
 
-    const interval = setInterval(() => {
-      const randomEv = logEvents[Math.floor(Math.random() * logEvents.length)];
-      setLogs((prev) => [
-        ...prev.slice(-6),
-        createLogEntry(randomEv.label, randomEv.value, randomEv.type as any),
-      ]);
-    }, 9000);
-
-    return () => clearInterval(interval);
+    return () => clearInterval(pingInterval);
   }, []);
 
   const handleCopyOTP = () => {
     navigator.clipboard.writeText(room.id).then(() => {
       setCopiedOtp(true);
-      setTimeout(() => setCopiedOtp(false), 1500);
+      addErrorToast('COPIED', `Room OTP [${room.id}] copied to system clipboard.`);
+      setTimeout(() => setCopiedOtp(false), 2000);
     });
   };
 
@@ -402,8 +393,12 @@ export const RoomView: React.FC<RoomViewProps> = ({
       {/* Room Header: OTP & Active Members */}
       <section className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center py-6 md:py-8 gap-6 border-b border-white/10">
         <div className="flex flex-col gap-1.5">
-          <span className="font-mono text-[11px] font-bold text-white/50 uppercase tracking-wider">
-            // ACTIVE_EPHEMERAL_ROOM_ID
+          <span
+            onClick={handleCopyOTP}
+            className="font-mono text-[11px] font-bold text-white/50 hover:text-blue-400 uppercase tracking-wider cursor-pointer transition-colors flex items-center gap-1.5"
+            title="Click to Copy Room OTP"
+          >
+            // ACTIVE_EPHEMERAL_ROOM_ID: <span className="text-blue-400 font-bold hover:underline">{copiedOtp ? 'COPIED' : room.id}</span>
           </span>
           <div className="flex items-center gap-3">
             <div
@@ -761,30 +756,44 @@ export const RoomView: React.FC<RoomViewProps> = ({
       )}
 
       {/* Technical Status Log Box (Floating Corner Widget) */}
-      <div className="fixed bottom-32 right-6 md:right-12 z-40 w-72 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-2xl hidden sm:block">
-        <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
-          <span className="font-mono text-xs font-bold text-blue-400">SYSTEM_LOG</span>
-          <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse shadow-[0_0_8px_#3b82f6]"></span>
+      <div className="fixed bottom-32 right-6 md:right-12 z-40 w-64 md:w-72 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-3 md:p-4 shadow-2xl hidden sm:block transition-all">
+        <div
+          className="flex items-center justify-between cursor-pointer select-none"
+          onClick={() => setIsLogMinimized(!isLogMinimized)}
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse shadow-[0_0_8px_#3b82f6]"></span>
+            <span className="font-mono text-xs font-bold text-blue-400">
+              SYSTEM_LOG {isLogMinimized && <span className="text-white/40 font-normal">[MINIMISED]</span>}
+            </span>
+          </div>
+          <button className="text-white/50 hover:text-white p-0.5 cursor-pointer">
+            <span className="material-symbols-outlined text-sm">
+              {isLogMinimized ? 'unfold_more' : 'unfold_less'}
+            </span>
+          </button>
         </div>
 
-        <div className="space-y-1.5 font-mono text-[11px] max-h-36 overflow-y-auto custom-scrollbar pr-1">
-          {logs.map((log) => (
-            <div key={log.id} className="flex justify-between items-center text-xs">
-              <span className="text-white/50 truncate pr-2">{log.label}:</span>
-              <span
-                className={
-                  log.type === 'success'
-                    ? 'text-emerald-400'
-                    : log.type === 'encryption'
-                    ? 'text-blue-400'
-                    : 'text-white'
-                }
-              >
-                {log.value}
-              </span>
-            </div>
-          ))}
-        </div>
+        {!isLogMinimized && (
+          <div className="space-y-1.5 font-mono text-[11px] max-h-36 overflow-y-auto custom-scrollbar pr-1 mt-3 border-t border-white/10 pt-2 animate-in fade-in duration-150">
+            {logs.map((log) => (
+              <div key={log.id} className="flex justify-between items-center text-xs">
+                <span className="text-white/50 truncate pr-2">{log.label}:</span>
+                <span
+                  className={
+                    log.type === 'success'
+                      ? 'text-emerald-400'
+                      : log.type === 'encryption'
+                      ? 'text-blue-400'
+                      : 'text-white'
+                  }
+                >
+                  {log.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Bottom Tray (The Bundle - Collective Pool) */}

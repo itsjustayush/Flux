@@ -7,6 +7,7 @@ import { RoomView } from './components/RoomView';
 import { FilePreviewModal } from './components/FilePreviewModal';
 import { NetworkTopologyScreen } from './components/NetworkTopologyScreen';
 import { HistoryScreen } from './components/HistoryScreen';
+import { HeroSection } from './components/HeroSection';
 import { DEFAULT_BUNDLE_ITEMS } from './data/defaultFiles';
 import { generateRoomOTP } from './lib/p2pEngine';
 import { auth, onAuthStateChanged, signOut } from './lib/firebase';
@@ -15,6 +16,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<ViewMode>('AUTH');
   const [session, setSession] = useState<UserSession | null>(null);
   const [authChecking, setAuthChecking] = useState(true);
+  const [showAuthScreen, setShowAuthScreen] = useState(false);
 
   const [latencyMs, setLatencyMs] = useState(24);
 
@@ -155,19 +157,46 @@ export default function App() {
     );
   }
 
-  // Guard: If unauthenticated, always force AuthScreen
+  // Guard: If unauthenticated, render HeroSection or AuthScreen
   if (!session) {
+    if (showAuthScreen) {
+      return (
+        <div className="bg-[#131313] text-[#e5e2e1] min-h-screen font-sans selection:bg-blue-500 selection:text-white relative overflow-x-hidden">
+          <div className="absolute top-4 left-4 z-50">
+            <button
+              onClick={() => setShowAuthScreen(false)}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full font-mono text-xs cursor-pointer backdrop-blur-md border border-white/20 transition-all"
+            >
+              ← BACK TO HERO
+            </button>
+          </div>
+          <Navbar
+            currentView="AUTH"
+            setView={setCurrentView}
+            session={null}
+            onLogout={handleLogout}
+            latencyMs={latencyMs}
+          />
+          <AuthScreen onLogin={handleLogin} />
+        </div>
+      );
+    }
+
     return (
-      <div className="bg-[#131313] text-[#e5e2e1] min-h-screen font-sans selection:bg-blue-500 selection:text-white relative overflow-x-hidden">
-        <Navbar
-          currentView="AUTH"
-          setView={setCurrentView}
-          session={null}
-          onLogout={handleLogout}
-          latencyMs={latencyMs}
-        />
-        <AuthScreen onLogin={handleLogin} />
-      </div>
+      <HeroSection
+        onSignIn={() => setShowAuthScreen(true)}
+        onStartForFree={() => {
+          // Automatic quick guest login
+          handleLogin({
+            id: 'guest_vault_user',
+            email: 'guest@ironclad.vault',
+            identifier: 'guest@ironclad.vault',
+            authenticated: true,
+            nodeType: 'IRONCLAD_VAULT_0.1',
+            encryptionAlgorithm: 'AES-256-GCM',
+          });
+        }}
+      />
     );
   }
 

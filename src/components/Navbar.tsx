@@ -81,10 +81,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="font-mono text-xs text-blue-400">
                   NODE: {session.identifier.split('@')[0].toUpperCase()}
                 </span>
-                <span className="font-mono text-[10px] text-white/50 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
-                  EPH_TUNNEL // {latencyMs}ms
-                </span>
               </div>
               <button
                 onClick={onLogout}

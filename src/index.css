@@ -1,14 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+:root {
+  --font-heading: 'Helvetica Now Display Bold', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --color-text: #192837;
+  --color-accent: #7342E2;
+  --color-login-bg: #F2F2EE;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+}
+
 @layer base {
-  body {
-    background-color: #050508;
-    color: #e0e0e0;
-    font-family: 'Inter', sans-serif;
+  h1, h2, h3, .font-heading {
+    font-family: var(--font-heading);
   }
 
-  h1, h2, h3, .font-geist {
-    font-family: 'Geist', sans-serif;
+  body {
+    font-family: var(--font-body);
   }
 
   code, .font-mono, .font-code {
@@ -32,64 +50,6 @@
     linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
 
-.frosted-glass, .glass-panel, .glass-card {
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-}
-
-.frosted-glass-hover {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.frosted-glass-hover:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(96, 165, 250, 0.4);
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
-}
-
-.frosted-button-primary {
-  background-color: #3b82f6;
-  color: #ffffff;
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.frosted-button-primary:hover {
-  background-color: #2563eb;
-  box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
-  transform: translateY(-1px);
-}
-
-.frosted-button-primary:active {
-  transform: scale(0.98);
-}
-
-.input-underlined {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.input-underlined:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
-}
-
-.pulse-indicator {
-  animation: pulse-blue 2s infinite;
-}
-
-@keyframes pulse-blue {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-}
-
 .custom-scrollbar::-webkit-scrollbar {
   height: 6px;
   width: 6px;
@@ -108,5 +68,6 @@
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
+
 
 
