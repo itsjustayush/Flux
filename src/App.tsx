@@ -34,8 +34,19 @@ export default function App() {
   // Modal State
   const [previewFile, setPreviewFile] = useState<BundleItem | null>(null);
 
-  // Sync with Firebase Auth state
+  // Sync with Firebase Auth state & handle URL deep-links
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const roomParam = params.get('room');
+    const actionParam = params.get('action');
+
+    if (roomParam) {
+      setRoom((prev) => ({
+        ...prev,
+        id: roomParam.toUpperCase(),
+      }));
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         const userSession: UserSession = {
@@ -47,7 +58,25 @@ export default function App() {
           encryptionAlgorithm: 'AES-256-GCM',
         };
         setSession(userSession);
-        setCurrentView((prev) => (prev === 'AUTH' ? 'DASHBOARD' : prev));
+
+        if (roomParam) {
+          setCurrentView('ROOM');
+          if (actionParam === 'download_bundle') {
+            setTimeout(() => {
+              // Trigger auto-download
+              DEFAULT_BUNDLE_ITEMS.forEach((file) => {
+                if (file.blobUrl) {
+                  const a = document.createElement('a');
+                  a.href = file.blobUrl;
+                  a.download = file.name;
+                  a.click();
+                }
+              });
+            }, 1000);
+          }
+        } else {
+          setCurrentView((prev) => (prev === 'AUTH' ? 'DASHBOARD' : prev));
+        }
       } else {
         setSession(null);
         setCurrentView('AUTH');
