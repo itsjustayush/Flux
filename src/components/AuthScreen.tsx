@@ -36,7 +36,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
     setErrorMsg(null);
 
     if (!email || !password) {
-      setErrorMsg('PLEASE_ENTER_EMAIL_AND_PASSWORD');
+      setErrorMsg('Please enter your email and password.');
       return;
     }
 
@@ -63,15 +63,17 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
       console.error('Firebase Auth Error:', err);
       let msg = err.message || 'AUTHENTICATION_FAILED';
       if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        msg = 'INVALID_EMAIL_OR_ACCESS_KEY';
+        msg = 'Incorrect email or password. Please try again.';
       } else if (err.code === 'auth/user-not-found') {
-        msg = 'USER_NOT_FOUND._PLEASE_SIGN_UP';
+        msg = 'No account found. Please sign up first.';
       } else if (err.code === 'auth/email-already-in-use') {
-        msg = 'EMAIL_ALREADY_REGISTERED._PLEASE_SIGN_IN';
+        msg = 'Email already registered. Please sign in instead.';
       } else if (err.code === 'auth/weak-password') {
-        msg = 'ACCESS_KEY_MUST_BE_AT_LEAST_6_CHARACTERS';
+        msg = 'Password must be at least 6 characters.';
       } else if (err.code === 'auth/invalid-email') {
-        msg = 'INVALID_EMAIL_FORMAT';
+        msg = 'Invalid email format. Please check and try again.';
+      } else if (err.code === 'auth/too-many-requests') {
+        msg = 'Too many failed attempts. Please try again later.';
       }
       setErrorMsg(msg);
     } finally {
@@ -226,7 +228,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
 
             <div className="flex flex-col space-y-1.5">
               <label className="font-mono text-[11px] font-bold text-[#192837]/70 uppercase tracking-widest">
-                ACCESS_KEY (PASSWORD)
+                PASSWORD
               </label>
               <div className="relative">
                 <input

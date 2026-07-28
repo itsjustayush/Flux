@@ -16,7 +16,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
 
   const handleCopyLink = () => {
-    const link = `${window.location.origin}#file=${file.fileId}`;
+    const link = `${window.location.origin}?file=${encodeURIComponent(file.fileId)}`;
     navigator.clipboard.writeText(link).then(() => {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 1500);

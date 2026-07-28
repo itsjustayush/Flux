@@ -1,11 +1,16 @@
 import React from 'react';
 import { RoomState } from '../types';
+import { formatRoomOTPDisplay } from '../lib/p2pEngine';
 
 interface NetworkTopologyScreenProps {
   room: RoomState;
 }
 
 export const NetworkTopologyScreen: React.FC<NetworkTopologyScreenProps> = ({ room }) => {
+  const peers = room.activePeers;
+  const you = peers.find((p) => p.isYou);
+  const remotePeers = peers.filter((p) => !p.isYou);
+
   return (
     <div className="min-h-screen pt-24 pb-20 px-6 md:px-12 max-w-[1280px] mx-auto selection:bg-[#7342E2] selection:text-white relative overflow-hidden bg-[#F2F2EE]">
       <header className="relative z-10 mb-8 border-b border-[#192837]/10 pb-4">
@@ -13,7 +18,7 @@ export const NetworkTopologyScreen: React.FC<NetworkTopologyScreenProps> = ({ ro
           // DECENTRALIZED_TOPOLOGY
         </span>
         <h1 className="text-3xl md:text-4xl font-heading font-bold text-[#192837]">
-          PEER_MESH_GRAPH // {room.id}
+          PEER_MESH_GRAPH // {formatRoomOTPDisplay(room.id)}
         </h1>
         <p className="font-sans text-sm text-[#192837]/70 mt-1">
           Real-time WebRTC data channels, encryption status, and peer routing matrix.
@@ -32,30 +37,54 @@ export const NetworkTopologyScreen: React.FC<NetworkTopologyScreenProps> = ({ ro
             </span>
           </div>
 
-          {/* Graphical Node Connectors */}
-          <div className="relative my-12 flex items-center justify-around">
-            <div className="flex flex-col items-center gap-2 z-10">
-              <div className="w-16 h-16 bg-[#F2F2EE] backdrop-blur-md rounded-2xl border-2 border-[#7342E2] flex items-center justify-center font-mono text-sm font-bold text-[#7342E2] shadow-md">
-                OP_01
-              </div>
-              <span className="font-mono text-xs text-[#192837] font-bold">YOU (HOST)</span>
-              <span className="font-mono text-[10px] text-[#7342E2] font-bold">AES-256-GCM</span>
+          {/* Dynamic peer graph */}
+          {peers.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center text-[#192837]/40 font-mono text-sm">
+              No peers connected yet.
             </div>
+          ) : (
+            <div className="relative my-8 flex items-center justify-center gap-0 flex-wrap">
+              {/* Host node */}
+              {you && (
+                <div className="flex flex-col items-center gap-2 z-10 mx-6">
+                  <div className="w-16 h-16 bg-[#F2F2EE] rounded-2xl border-2 border-[#7342E2] flex items-center justify-center font-mono text-sm font-bold text-[#7342E2] shadow-md">
+                    {you.name.slice(0, 5)}
+                  </div>
+                  <span className="font-mono text-xs text-[#192837] font-bold">YOU (HOST)</span>
+                  <span className="font-mono text-[10px] text-[#7342E2] font-bold">AES-256-GCM</span>
+                </div>
+              )}
 
-            <div className="flex-1 h-0.5 bg-gradient-to-r from-[#7342E2] via-purple-400 to-[#7342E2] relative mx-4 animate-pulse">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white backdrop-blur-md px-3 py-1 rounded-full border border-[#192837]/20 font-mono text-[10px] text-[#7342E2] font-bold shadow-md">
-                24MS // 14.2 MB/S
-              </div>
-            </div>
+              {/* Connector lines + remote peers */}
+              {remotePeers.map((peer, idx) => (
+                <React.Fragment key={peer.id}>
+                  <div className="flex items-center mx-2">
+                    <div className="w-16 md:w-24 h-0.5 bg-gradient-to-r from-[#7342E2] via-purple-400 to-[#7342E2] relative animate-pulse">
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white backdrop-blur-md px-2 py-0.5 rounded-full border border-[#192837]/20 font-mono text-[10px] text-[#7342E2] font-bold shadow-md whitespace-nowrap">
+                        {peer.latencyMs}ms
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center gap-2 z-10 mx-6">
+                    <div className="w-16 h-16 bg-[#F2F2EE] rounded-2xl border border-[#192837]/30 flex items-center justify-center font-mono text-sm font-bold text-[#192837] shadow-sm">
+                      {peer.name.slice(0, 5)}
+                    </div>
+                    <span className="font-mono text-xs text-[#192837] font-bold">
+                      EPH_PEER_{String.fromCharCode(65 + idx)}
+                    </span>
+                    <span className="font-mono text-[10px] text-[#7342E2] font-bold">AES-256-GCM</span>
+                  </div>
+                </React.Fragment>
+              ))}
 
-            <div className="flex flex-col items-center gap-2 z-10">
-              <div className="w-16 h-16 bg-[#F2F2EE] backdrop-blur-md rounded-2xl border border-[#192837]/30 flex items-center justify-center font-mono text-sm font-bold text-[#192837]">
-                OP_02
-              </div>
-              <span className="font-mono text-xs text-[#192837] font-bold">EPH_PEER_ALPHA</span>
-              <span className="font-mono text-[10px] text-[#7342E2] font-bold">AES-256-GCM</span>
+              {/* Show placeholder if only you are connected */}
+              {remotePeers.length === 0 && you && (
+                <div className="flex items-center mx-4 text-[#192837]/40 font-mono text-xs">
+                  ← Waiting for peers to connect
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-3 gap-4 border-t border-[#192837]/10 pt-4 z-10 font-bold">
             <div>
@@ -68,7 +97,9 @@ export const NetworkTopologyScreen: React.FC<NetworkTopologyScreenProps> = ({ ro
             </div>
             <div>
               <div className="font-mono text-[10px] text-[#192837]/50">DATA CHANNEL</div>
-              <div className="font-mono text-xs text-emerald-600">OPEN_STABLE</div>
+              <div className="font-mono text-xs text-emerald-600">
+                {peers.length > 1 ? 'OPEN_STABLE' : 'AWAITING_PEER'}
+              </div>
             </div>
           </div>
         </div>
@@ -103,6 +134,16 @@ export const NetworkTopologyScreen: React.FC<NetworkTopologyScreenProps> = ({ ro
                   <span className="text-emerald-600 font-bold">~0.005 g CO2e/MB</span>
                 </div>
               </div>
+            </div>
+
+            {/* Live peer count */}
+            <div className="p-3 bg-[#7342E2]/10 border border-[#7342E2]/30 rounded-2xl">
+              <span className="font-mono text-[11px] font-bold text-[#7342E2] block mb-1">
+                LIVE PEERS IN THIS ROOM
+              </span>
+              <span className="font-heading text-2xl font-bold text-[#192837]">
+                {peers.length} CONNECTED
+              </span>
             </div>
           </div>
 

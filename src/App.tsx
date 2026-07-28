@@ -9,7 +9,7 @@ import { NetworkTopologyScreen } from './components/NetworkTopologyScreen';
 import { HistoryScreen } from './components/HistoryScreen';
 import { HeroSection } from './components/HeroSection';
 import { DEFAULT_BUNDLE_ITEMS } from './data/defaultFiles';
-import { generateRoomOTP } from './lib/p2pEngine';
+import { generateRoomOTP, formatRoomOTPDisplay } from './lib/p2pEngine';
 import { auth, onAuthStateChanged, signOut } from './lib/firebase';
 
 export default function App() {
@@ -167,7 +167,7 @@ export default function App() {
               onClick={() => setShowAuthScreen(false)}
               className="px-4 py-2 bg-white/80 hover:bg-white text-[#192837] rounded-full font-mono text-xs cursor-pointer backdrop-blur-md border border-[#192837]/20 shadow-sm transition-all"
             >
-              ← BACK TO HERO
+              ← Back to Home
             </button>
           </div>
           <Navbar
@@ -186,15 +186,8 @@ export default function App() {
       <HeroSection
         onSignIn={() => setShowAuthScreen(true)}
         onStartForFree={() => {
-          // Automatic quick guest login
-          handleLogin({
-            id: 'guest_vault_user',
-            email: 'guest@ironclad.vault',
-            identifier: 'guest@ironclad.vault',
-            authenticated: true,
-            nodeType: 'IRONCLAD_VAULT_0.1',
-            encryptionAlgorithm: 'AES-256-GCM',
-          });
+          // Authentication is required — open the auth screen for sign-up
+          setShowAuthScreen(true);
         }}
       />
     );

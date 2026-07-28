@@ -189,13 +189,23 @@ export function validateTransferQuota(
 }
 
 /**
- * Generates human-readable 6-character room OTP codes (e.g., X-R92-K)
+ * Generates a 6-character alphanumeric room OTP code (e.g., XR92KB).
+ * Displayed with a middle dash for readability (XR-92-KB) but stored as plain 6 chars.
  */
 export function generateRoomOTP(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const pick = (len: number) =>
     Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  return `${pick(1)}-${pick(3)}-${pick(1)}`;
+  return `${pick(2)}${pick(2)}${pick(2)}`; // 6 chars, e.g. "XR92KB"
+}
+
+/**
+ * Format a 6-char room OTP for display with dashes (e.g., XR-92-KB)
+ */
+export function formatRoomOTPDisplay(otp: string): string {
+  const clean = otp.replace(/-/g, '');
+  if (clean.length === 6) return `${clean.slice(0, 2)}-${clean.slice(2, 4)}-${clean.slice(4, 6)}`;
+  return otp;
 }
 
 /**

@@ -69,5 +69,19 @@ body {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
+/* Primary action button for modals */
+.frosted-button-primary {
+  background-color: #7342E2;
+  color: #fff;
+  border: none;
+  transition: background-color 0.2s, transform 0.1s;
+}
+.frosted-button-primary:hover {
+  background-color: rgba(115, 66, 226, 0.9);
+}
+.frosted-button-primary:active {
+  transform: scale(0.97);
+}
+
 
 

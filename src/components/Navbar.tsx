@@ -87,7 +87,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 title="Disconnect Node Session"
                 className="p-2 hover:bg-red-500/10 hover:border-red-500/40 transition-all text-[#192837] border border-[#192837]/20 rounded-xl flex items-center justify-center cursor-pointer"
               >
-                <span className="material-symbols-outlined text-xl">account_circle</span>
+                <span className="material-symbols-outlined text-xl">logout</span>
               </button>
             </>
           ) : (

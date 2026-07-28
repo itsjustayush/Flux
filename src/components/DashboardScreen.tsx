@@ -14,7 +14,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onJoinRoom,
   setView,
 }) => {
-  const [otpValues, setOtpValues] = useState<string[]>(['4', '9', '', '', '', '']);
+  const [otpValues, setOtpValues] = useState<string[]>(['', '', '', '', '', '']);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleOtpChange = (index: number, value: string) => {
@@ -48,11 +48,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   };
 
   const handleVerifyJoin = () => {
-    const code = otpValues.join('');
-    if (code.length >= 4) {
+    const code = otpValues.join('').replace(/-/g, '').trim();
+    if (code.length === 6) {
       onJoinRoom(code);
     } else {
-      alert('Please enter a valid 6-digit room authentication code.');
+      alert('Please enter the full 6-character room code.');
     }
   };
 
@@ -184,14 +184,21 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           className="flex flex-col items-center justify-center text-[#192837]/60 px-4 py-1 hover:text-[#192837]"
         >
           <span className="material-symbols-outlined text-xl">swap_horiz</span>
-          <span className="font-mono text-[10px] font-bold">PACKAGE</span>
+          <span className="font-mono text-[10px] font-bold">ROOM</span>
         </button>
         <button
-          onClick={() => setView('ROOM')}
+          onClick={() => setView('NETWORK')}
           className="flex flex-col items-center justify-center text-[#192837]/60 px-4 py-1 hover:text-[#192837]"
         >
-          <span className="material-symbols-outlined text-xl">layers</span>
-          <span className="font-mono text-[10px] font-bold">BUNDLE</span>
+          <span className="material-symbols-outlined text-xl">hub</span>
+          <span className="font-mono text-[10px] font-bold">NETWORK</span>
+        </button>
+        <button
+          onClick={() => setView('HISTORY')}
+          className="flex flex-col items-center justify-center text-[#192837]/60 px-4 py-1 hover:text-[#192837]"
+        >
+          <span className="material-symbols-outlined text-xl">history</span>
+          <span className="font-mono text-[10px] font-bold">HISTORY</span>
         </button>
       </footer>
     </div>

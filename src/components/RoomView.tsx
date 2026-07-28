@@ -11,6 +11,7 @@ import {
   WebRTCPeerEngine,
   validateTransferQuota,
   WebRTCConnectionState,
+  formatRoomOTPDisplay,
 } from '../lib/p2pEngine';
 import { QRCodeModal } from './QRCodeModal';
 
@@ -34,7 +35,9 @@ export const RoomView: React.FC<RoomViewProps> = ({
   onAddBundleItem,
 }) => {
   const [copiedOtp, setCopiedOtp] = useState(false);
-  const [targetPeer, setTargetPeer] = useState<string>('OP_02');
+  // Default to first remote peer, or ALL_BUNDLE if none
+  const initialTarget = room.activePeers.find((p) => !p.isYou)?.id || 'ALL_BUNDLE';
+  const [targetPeer, setTargetPeer] = useState<string>(initialTarget);
   const [isDragging, setIsDragging] = useState(false);
   const [webrtcState, setWebrtcState] = useState<WebRTCConnectionState>('connected');
   const [errorToasts, setErrorToasts] = useState<ErrorToast[]>([]);
@@ -150,7 +153,6 @@ export const RoomView: React.FC<RoomViewProps> = ({
   const handleCopyOTP = () => {
     navigator.clipboard.writeText(room.id).then(() => {
       setCopiedOtp(true);
-      addErrorToast('COPIED', `Room OTP [${room.id}] copied to system clipboard.`);
       setTimeout(() => setCopiedOtp(false), 2000);
     });
   };
@@ -408,7 +410,7 @@ export const RoomView: React.FC<RoomViewProps> = ({
             className="font-mono text-[11px] font-bold text-[#192837]/60 hover:text-[#7342E2] uppercase tracking-wider cursor-pointer transition-colors flex items-center gap-1.5"
             title="Click to Copy Room OTP"
           >
-            // ACTIVE_EPHEMERAL_ROOM_ID: <span className="text-[#7342E2] font-bold hover:underline">{copiedOtp ? 'COPIED' : room.id}</span>
+            // ACTIVE_EPHEMERAL_ROOM_ID: <span className="text-[#7342E2] font-bold hover:underline">{copiedOtp ? 'COPIED ✓' : formatRoomOTPDisplay(room.id)}</span>
           </span>
           <div className="flex items-center gap-3">
             <div
@@ -417,7 +419,7 @@ export const RoomView: React.FC<RoomViewProps> = ({
               title="Click to Copy Room OTP"
             >
               <h1 className="font-heading text-3xl md:text-5xl font-bold tracking-widest text-[#192837]">
-                {copiedOtp ? 'COPIED' : room.id}
+                {copiedOtp ? 'COPIED ✓' : formatRoomOTPDisplay(room.id)}
               </h1>
               <span className="material-symbols-outlined text-[#7342E2] group-hover:scale-110 transition-transform">
                 content_copy
@@ -572,19 +574,21 @@ export const RoomView: React.FC<RoomViewProps> = ({
             : 'border-[#192837]/20 bg-white/80 hover:border-[#7342E2]/50 hover:bg-white/90'
         }`}
       >
-        {/* Target Selector Dropdown */}
+        {/* Target Selector Dropdown — dynamic based on real peer list */}
         <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/90 border border-[#192837]/15 px-3.5 py-1.5 rounded-2xl font-mono text-xs backdrop-blur-md shadow-sm">
-          <span className="text-[#192837]/60 font-bold">TARGET_PEER:</span>
+          <span className="text-[#192837]/60 font-bold">TARGET:</span>
           <select
             value={targetPeer}
             onChange={(e) => setTargetPeer(e.target.value)}
             className="bg-transparent text-[#7342E2] font-mono font-bold focus:outline-none cursor-pointer"
           >
-            <option value="OP_02" className="bg-white text-[#192837]">
-              OP_02 (Direct Package 1:1)
-            </option>
+            {peersList.filter((p) => !p.isYou).map((p) => (
+              <option key={p.id} value={p.id} className="bg-white text-[#192837]">
+                {p.name} (Direct 1:1)
+              </option>
+            ))}
             <option value="ALL_BUNDLE" className="bg-white text-[#192837]">
-              ALL PEERS (Room Bundle Pool)
+              ALL PEERS (Room Bundle)
             </option>
           </select>
         </div>
