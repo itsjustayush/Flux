@@ -4,9 +4,8 @@ import {
   auth,
   googleAuthProvider,
   signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
 } from '../lib/firebase';
+import { signInWithEmail, signUpWithEmail } from '../lib/auth';
 
 interface AuthScreenProps {
   onLogin: (session: UserSession) => void;
@@ -43,14 +42,18 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      let userCredential;
-      if (isSignUp) {
-        userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      } else {
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const result = isSignUp
+        ? await signUpWithEmail(email, password)
+        : await signInWithEmail(email, password);
+
+      if (!result.success) {
+        // Production-ready error message (safe for users)
+        setErrorMsg(result.errorMessage || 'Authentication failed. Please try again.');
+        console.error('[v0] Auth failed with code:', result.errorCode);
+        return;
       }
 
-      const firebaseUser = userCredential.user;
+      const firebaseUser = result.userCredential!.user;
       onLogin({
         id: firebaseUser.uid,
         email: firebaseUser.email || email,
@@ -60,22 +63,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
         encryptionAlgorithm: 'AES-256-GCM',
       });
     } catch (err: any) {
-      console.error('Firebase Auth Error:', err);
-      let msg = err.message || 'AUTHENTICATION_FAILED';
-      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        msg = 'Incorrect email or password. Please try again.';
-      } else if (err.code === 'auth/user-not-found') {
-        msg = 'No account found. Please sign up first.';
-      } else if (err.code === 'auth/email-already-in-use') {
-        msg = 'Email already registered. Please sign in instead.';
-      } else if (err.code === 'auth/weak-password') {
-        msg = 'Password must be at least 6 characters.';
-      } else if (err.code === 'auth/invalid-email') {
-        msg = 'Invalid email format. Please check and try again.';
-      } else if (err.code === 'auth/too-many-requests') {
-        msg = 'Too many failed attempts. Please try again later.';
-      }
-      setErrorMsg(msg);
+      // Unexpected error (should not reach here with proper error handling)
+      console.error('[v0] Unexpected auth error:', err);
+      setErrorMsg('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }

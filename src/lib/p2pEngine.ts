@@ -30,7 +30,7 @@ export interface P2PSignalPayload {
  */
 export class WebRTCPeerEngine {
   private pc: RTCPeerConnection | null = null;
-  private dataChannel: RTCDataChannel | null = null;
+  public dataChannel: RTCDataChannel | null = null;  // Made public for real-time transfer access
   private roomId: string;
   private peerId: string;
 
