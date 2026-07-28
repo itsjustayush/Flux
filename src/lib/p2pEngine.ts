@@ -1,10 +1,11 @@
 import { SystemLogEntry } from '../types';
+import { getIceServerManager } from './iceServerManager';
 
-export const ICE_SERVERS: RTCConfiguration = {
-  iceServers: [
-    { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
-  ],
-};
+// ICE configuration now managed by IceServerManager for failover and health checking
+export function getIceServerConfiguration(): RTCConfiguration {
+  const manager = getIceServerManager();
+  return manager.getConfiguration();
+}
 
 export const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB max single file
 export const MAX_BUNDLE_QUOTA = 2 * 1024 * 1024 * 1024; // 2 GB max RAM quota
@@ -46,7 +47,8 @@ export class WebRTCPeerEngine {
 
   private initPeerConnection() {
     try {
-      this.pc = new RTCPeerConnection(ICE_SERVERS);
+      const iceConfig = getIceServerConfiguration();
+      this.pc = new RTCPeerConnection(iceConfig);
 
       // Listen for ICE candidates
       this.pc.onicecandidate = (event) => {
