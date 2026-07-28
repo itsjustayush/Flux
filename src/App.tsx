@@ -148,9 +148,9 @@ export default function App() {
 
   if (authChecking) {
     return (
-      <div className="mesh-bg min-h-screen bg-[#131313] text-white flex flex-col items-center justify-center p-6 font-mono">
-        <div className="w-8 h-8 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <div className="text-xs text-blue-400 tracking-widest font-bold uppercase">
+      <div className="min-h-screen bg-[#F2F2EE] text-[#192837] flex flex-col items-center justify-center p-6 font-mono">
+        <div className="w-8 h-8 border-2 border-[#7342E2] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <div className="text-xs text-[#7342E2] tracking-widest font-bold uppercase">
           VERIFYING_FIREBASE_SESSION...
         </div>
       </div>
@@ -161,11 +161,11 @@ export default function App() {
   if (!session) {
     if (showAuthScreen) {
       return (
-        <div className="bg-[#131313] text-[#e5e2e1] min-h-screen font-sans selection:bg-blue-500 selection:text-white relative overflow-x-hidden">
+        <div className="bg-[#F2F2EE] text-[#192837] min-h-screen font-sans selection:bg-[#7342E2] selection:text-white relative overflow-x-hidden">
           <div className="absolute top-4 left-4 z-50">
             <button
               onClick={() => setShowAuthScreen(false)}
-              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full font-mono text-xs cursor-pointer backdrop-blur-md border border-white/20 transition-all"
+              className="px-4 py-2 bg-white/80 hover:bg-white text-[#192837] rounded-full font-mono text-xs cursor-pointer backdrop-blur-md border border-[#192837]/20 shadow-sm transition-all"
             >
               ← BACK TO HERO
             </button>
@@ -201,7 +201,7 @@ export default function App() {
   }
 
   return (
-    <div className="bg-[#131313] text-[#e5e2e1] min-h-screen font-sans selection:bg-blue-500 selection:text-white relative overflow-x-hidden">
+    <div className="bg-[#F2F2EE] text-[#192837] min-h-screen font-sans selection:bg-[#7342E2] selection:text-white relative overflow-x-hidden">
       {/* Top Navbar */}
       <Navbar
         currentView={currentView}

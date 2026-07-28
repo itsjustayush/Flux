@@ -35,7 +35,7 @@ const fadeUp = {
   }),
 };
 
-const navLinks = ['Vault', 'Plans', 'Install', 'News', 'Help'];
+const navLinks = ['P2P Grid', 'Encryption', 'WebRTC', 'Topology', 'Logs'];
 
 interface HeroSectionProps {
   onSignIn?: () => void;
@@ -245,7 +245,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSignIn, onStartForFr
             }}
           >
             <span className="whitespace-nowrap">
-              Lock
+              Transfer
               <Zap
                 size={24}
                 style={{
@@ -257,7 +257,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSignIn, onStartForFr
                   margin: '0 4px',
                 }}
               />
-              Down Your
+              Files Direct
               <LockKeyhole
                 size={24}
                 style={{
@@ -269,11 +269,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSignIn, onStartForFr
                   margin: '0 4px',
                 }}
               />
-              Passwords
+              P2P
             </span>
             <br />
             <span>
-              with Ironclad Security
+              with Zero-Cloud Privacy
               <Fingerprint
                 size={24}
                 style={{
@@ -303,8 +303,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSignIn, onStartForFr
               lineHeight: 1.65,
             }}
           >
-            Zero stress, total control. Unbreakable storage, one-tap access, and
-            pro-grade tools for your non-stop world.
+            Zero cloud servers, total privacy. WebRTC direct peer-to-peer streaming, client-side AES-GCM encryption, and instant QR room sharing.
           </motion.p>
 
           {/* CTA Button */}
@@ -331,7 +330,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSignIn, onStartForFr
                 boxShadow: '0 4px 24px rgba(115,66,226,0.28)',
               }}
             >
-              <span>Get It Free</span>
+              <span>Launch Ephemeral Grid</span>
               <ArrowRightCircle size={20} className="shrink-0" />
             </motion.button>
           </motion.div>

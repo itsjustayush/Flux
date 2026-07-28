@@ -17,55 +17,55 @@ export const Navbar: React.FC<NavbarProps> = ({
   latencyMs,
 }) => {
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-black/40 backdrop-blur-xl border-b border-white/10">
-      <div className="flex justify-between items-center w-full px-6 md:px-12 py-3.5 max-w-[1200px] mx-auto">
+    <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-[#192837]/10 shadow-sm transition-all">
+      <div className="flex justify-between items-center w-full px-6 md:px-12 py-3.5 max-w-[1280px] mx-auto">
         <div className="flex items-center gap-8">
           <button
             onClick={() => setView(session?.authenticated ? 'DASHBOARD' : 'AUTH')}
-            className="text-xl font-bold font-geist text-white tracking-tighter hover:opacity-90 transition-opacity flex items-center gap-2.5 cursor-pointer"
+            className="text-xl font-bold font-heading text-[#192837] tracking-tighter hover:opacity-90 transition-opacity flex items-center gap-2.5 cursor-pointer"
           >
-            <div className="w-3 h-3 bg-blue-500 rounded-full shadow-[0_0_12px_#3b82f6] animate-pulse"></div>
-            FLUX<span className="text-blue-400">.P2P</span>
+            <div className="w-3 h-3 bg-[#7342E2] rounded-full shadow-[0_0_12px_#7342E2] animate-pulse"></div>
+            FLUX<span className="text-[#7342E2]">.P2P</span>
           </button>
 
           {session?.authenticated && (
             <nav className="hidden md:flex items-center gap-2">
               <button
                 onClick={() => setView('DASHBOARD')}
-                className={`font-mono text-xs font-bold uppercase transition-all px-3 py-1.5 rounded-lg ${
+                className={`font-mono text-xs font-bold uppercase transition-all px-3 py-1.5 rounded-lg cursor-pointer ${
                   currentView === 'DASHBOARD'
-                    ? 'text-blue-400 bg-blue-500/10 border border-blue-500/30'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    ? 'text-[#7342E2] bg-[#7342E2]/10 border border-[#7342E2]/30'
+                    : 'text-[#192837]/70 hover:text-[#192837] hover:bg-[#192837]/5'
                 }`}
               >
                 DASHBOARD
               </button>
               <button
                 onClick={() => setView('ROOM')}
-                className={`font-mono text-xs font-bold uppercase transition-all px-3 py-1.5 rounded-lg ${
+                className={`font-mono text-xs font-bold uppercase transition-all px-3 py-1.5 rounded-lg cursor-pointer ${
                   currentView === 'ROOM'
-                    ? 'text-blue-400 bg-blue-500/10 border border-blue-500/30'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    ? 'text-[#7342E2] bg-[#7342E2]/10 border border-[#7342E2]/30'
+                    : 'text-[#192837]/70 hover:text-[#192837] hover:bg-[#192837]/5'
                 }`}
               >
                 ROOM_VIEW
               </button>
               <button
                 onClick={() => setView('NETWORK')}
-                className={`font-mono text-xs font-bold uppercase transition-all px-3 py-1.5 rounded-lg ${
+                className={`font-mono text-xs font-bold uppercase transition-all px-3 py-1.5 rounded-lg cursor-pointer ${
                   currentView === 'NETWORK'
-                    ? 'text-blue-400 bg-blue-500/10 border border-blue-500/30'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    ? 'text-[#7342E2] bg-[#7342E2]/10 border border-[#7342E2]/30'
+                    : 'text-[#192837]/70 hover:text-[#192837] hover:bg-[#192837]/5'
                 }`}
               >
                 NETWORK
               </button>
               <button
                 onClick={() => setView('HISTORY')}
-                className={`font-mono text-xs font-bold uppercase transition-all px-3 py-1.5 rounded-lg ${
+                className={`font-mono text-xs font-bold uppercase transition-all px-3 py-1.5 rounded-lg cursor-pointer ${
                   currentView === 'HISTORY'
-                    ? 'text-blue-400 bg-blue-500/10 border border-blue-500/30'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    ? 'text-[#7342E2] bg-[#7342E2]/10 border border-[#7342E2]/30'
+                    : 'text-[#192837]/70 hover:text-[#192837] hover:bg-[#192837]/5'
                 }`}
               >
                 HISTORY
@@ -78,14 +78,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           {session?.authenticated ? (
             <>
               <div className="hidden sm:flex flex-col items-end">
-                <span className="font-mono text-xs text-blue-400">
+                <span className="font-mono text-xs font-bold text-[#7342E2]">
                   NODE: {session.identifier.split('@')[0].toUpperCase()}
                 </span>
               </div>
               <button
                 onClick={onLogout}
                 title="Disconnect Node Session"
-                className="p-2 hover:bg-red-500/10 hover:border-red-500/40 transition-all text-white border border-white/20 rounded-xl flex items-center justify-center cursor-pointer"
+                className="p-2 hover:bg-red-500/10 hover:border-red-500/40 transition-all text-[#192837] border border-[#192837]/20 rounded-xl flex items-center justify-center cursor-pointer"
               >
                 <span className="material-symbols-outlined text-xl">account_circle</span>
               </button>
@@ -93,7 +93,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <button
               onClick={() => setView('AUTH')}
-              className="font-mono text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.4)] px-4 py-2 rounded-xl transition-all cursor-pointer"
+              className="font-mono text-xs font-bold text-white bg-[#7342E2] hover:bg-[#7342E2]/90 shadow-[0_0_15px_rgba(115,66,226,0.3)] px-5 py-2.5 rounded-full transition-all cursor-pointer"
             >
               ESTABLISH_CONNECTION
             </button>
@@ -103,3 +103,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+

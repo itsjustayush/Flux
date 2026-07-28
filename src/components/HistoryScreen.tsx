@@ -13,24 +13,20 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ bundleItems, onWip
   const savedCloudCarbonGrams = parseFloat((totalBytes / (1024 * 1024) * 0.055).toFixed(2));
 
   return (
-    <div className="mesh-bg min-h-screen pt-24 pb-20 px-6 md:px-12 max-w-[1200px] mx-auto selection:bg-blue-500 selection:text-white relative overflow-hidden">
-      {/* Mesh Background Orbs */}
-      <div className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-100px] right-[-100px] w-[600px] h-[600px] bg-purple-900/20 rounded-full blur-[150px] pointer-events-none"></div>
-
-      <header className="relative z-10 mb-8 border-b border-white/10 pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="min-h-screen pt-24 pb-20 px-6 md:px-12 max-w-[1280px] mx-auto selection:bg-[#7342E2] selection:text-white relative overflow-hidden bg-[#F2F2EE]">
+      <header className="relative z-10 mb-8 border-b border-[#192837]/10 pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <span className="font-mono text-xs font-bold text-blue-400 block mb-1">
+          <span className="font-mono text-xs font-bold text-[#7342E2] block mb-1">
             // EPHEMERAL_SESSION_LOGS
           </span>
-          <h1 className="text-3xl md:text-4xl font-geist font-bold text-white">
+          <h1 className="text-3xl md:text-4xl font-heading font-bold text-[#192837]">
             TRANSFERRED_ASSETS_CACHE
           </h1>
         </div>
 
         <button
           onClick={onWipeSession}
-          className="border border-red-500/50 text-red-400 hover:bg-red-500/10 px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-2"
+          className="border border-red-500/50 text-red-600 bg-red-500/10 hover:bg-red-500/20 px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-sm"
         >
           <span className="material-symbols-outlined text-lg">delete_forever</span>
           WIPE_EPHEMERAL_RAM
@@ -39,61 +35,61 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ bundleItems, onWip
 
       {/* Overview Cards */}
       <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl p-6 shadow-xl">
-          <span className="font-mono text-[11px] font-bold text-white/50 block mb-1">
+        <div className="bg-white/80 backdrop-blur-2xl border border-[#192837]/10 rounded-3xl p-6 shadow-xl">
+          <span className="font-mono text-[11px] font-bold text-[#192837]/50 block mb-1">
             TOTAL_ASSETS_HELD
           </span>
-          <span className="font-geist text-3xl font-bold text-white">
+          <span className="font-heading text-3xl font-bold text-[#192837]">
             {bundleItems.length} FILES
           </span>
         </div>
 
-        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl p-6 shadow-xl">
-          <span className="font-mono text-[11px] font-bold text-white/50 block mb-1">
+        <div className="bg-white/80 backdrop-blur-2xl border border-[#192837]/10 rounded-3xl p-6 shadow-xl">
+          <span className="font-mono text-[11px] font-bold text-[#192837]/50 block mb-1">
             TOTAL_EPHEMERAL_DATA
           </span>
-          <span className="font-geist text-3xl font-bold text-blue-400">
+          <span className="font-heading text-3xl font-bold text-[#7342E2]">
             {formatBytes(totalBytes)}
           </span>
         </div>
 
-        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl p-6 shadow-xl">
-          <span className="font-mono text-[11px] font-bold text-white/50 block mb-1">
+        <div className="bg-white/80 backdrop-blur-2xl border border-[#192837]/10 rounded-3xl p-6 shadow-xl">
+          <span className="font-mono text-[11px] font-bold text-[#192837]/50 block mb-1">
             ESTIMATED_CARBON_SAVINGS
           </span>
-          <span className="font-geist text-3xl font-bold text-emerald-400">
+          <span className="font-heading text-3xl font-bold text-emerald-600">
             {savedCloudCarbonGrams}g CO2e
           </span>
         </div>
       </div>
 
       {/* Asset Table */}
-      <div className="relative z-10 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-        <div className="p-4 bg-white/[0.02] border-b border-white/10 flex justify-between items-center">
-          <span className="font-mono text-xs font-bold text-white">SESSION_PAYLOAD_REGISTRY</span>
-          <span className="font-mono text-[11px] text-blue-400">NON-PERSISTENT (RAM ONLY)</span>
+      <div className="relative z-10 bg-white/80 backdrop-blur-2xl border border-[#192837]/10 rounded-3xl overflow-hidden shadow-xl text-[#192837]">
+        <div className="p-4 bg-[#192837]/5 border-b border-[#192837]/10 flex justify-between items-center">
+          <span className="font-mono text-xs font-bold text-[#192837]">SESSION_PAYLOAD_REGISTRY</span>
+          <span className="font-mono text-[11px] font-bold text-[#7342E2]">NON-PERSISTENT (RAM ONLY)</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left font-mono text-xs">
-            <thead className="border-b border-white/10 bg-white/5 text-white/50">
+            <thead className="border-b border-[#192837]/10 bg-[#192837]/5 text-[#192837]/60">
               <tr>
-                <th className="p-3.5">FILE_NAME</th>
-                <th className="p-3.5">FILE_ID</th>
-                <th className="p-3.5">SIZE</th>
-                <th className="p-3.5">ENCRYPTION</th>
-                <th className="p-3.5">CARBON</th>
-                <th className="p-3.5">ACTION</th>
+                <th className="p-3.5 font-bold">FILE_NAME</th>
+                <th className="p-3.5 font-bold">FILE_ID</th>
+                <th className="p-3.5 font-bold">SIZE</th>
+                <th className="p-3.5 font-bold">ENCRYPTION</th>
+                <th className="p-3.5 font-bold">CARBON</th>
+                <th className="p-3.5 font-bold">ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10 text-white">
+            <tbody className="divide-y divide-[#192837]/10 text-[#192837]">
               {bundleItems.map((item) => (
-                <tr key={item.id} className="hover:bg-white/5 transition-colors">
+                <tr key={item.id} className="hover:bg-[#192837]/5 transition-colors">
                   <td className="p-3.5 font-bold truncate max-w-[200px]">{item.name}</td>
-                  <td className="p-3.5 text-blue-400">{item.fileId}</td>
-                  <td className="p-3.5">{formatBytes(item.size)}</td>
-                  <td className="p-3.5 text-emerald-400">{item.encryptionStatus}</td>
-                  <td className="p-3.5">{item.carbonFootprintGrams}g CO2e</td>
+                  <td className="p-3.5 text-[#7342E2] font-bold">{item.fileId}</td>
+                  <td className="p-3.5 font-bold">{formatBytes(item.size)}</td>
+                  <td className="p-3.5 text-emerald-600 font-bold">{item.encryptionStatus}</td>
+                  <td className="p-3.5 font-bold">{item.carbonFootprintGrams}g CO2e</td>
                   <td className="p-3.5">
                     <button
                       onClick={() => {
@@ -102,7 +98,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ bundleItems, onWip
                         a.download = item.name;
                         a.click();
                       }}
-                      className="text-blue-400 hover:underline cursor-pointer font-bold"
+                      className="text-[#7342E2] hover:underline cursor-pointer font-bold"
                     >
                       DOWNLOAD
                     </button>
